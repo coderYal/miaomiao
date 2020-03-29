@@ -1,23 +1,30 @@
 <template>
   <div class="city_body">
 		<div class="city_list">
-			<div class="city_hot">
-				<h2>热门城市</h2>
-				<!-- for渲染热门城市数据 -->
-				<ul class="clearfix">
-					<li v-for="item in hotCity" :key="item.id">{{ item.name }}</li>
-				</ul>
-			</div>
-			<!-- ref在普通的dom元素上使用,引用指向的就是DOM元素 -->
-			<div class="city_sort" ref="city_sort">
-				<!-- 渲染城市列表数据 -->
-        <div v-for="item in cityList" :key="item.index">
-					<h2>{{ item.index }}</h2>
-					<ul>
-						<li v-for="itemList in item.list" :key="itemList.id">{{ itemList.name }}</li>
-					</ul>
+			<Loading v-if="isLoading" />
+			<Scroller v-else ref="city_List">
+				<div>
+					<div class="city_hot">
+						<h2>热门城市</h2>
+						<!-- for渲染热门城市数据 -->
+						<ul class="clearfix">
+							<!-- @tap设置点击方法,并且传入城市名字及id -->
+							<li v-for="item in hotCity" :key="item.id" @tap="handleToCity(item.name, item.id)">{{ item.name }}</li>
+						</ul>
+					</div>
+					<!-- ref在普通的dom元素上使用,引用指向的就是DOM元素 -->
+					<div class="city_sort" ref="city_sort">
+						<!-- 渲染城市列表数据 -->
+						<div v-for="item in cityList" :key="item.index">
+							<h2>{{ item.index }}</h2>
+							<ul>
+								<!-- @tap设置点击方法,并且传入城市名字及id -->
+								<li v-for="itemList in item.list" :key="itemList.id" @tap="handleToCity(itemList.name, itemList.id)">{{ itemList.name }}</li>
+							</ul>
+						</div>
+					</div>
 				</div>
-			</div>
+			</Scroller>		
 		</div>
 		<!-- 渲染右边A-Z的数据 -->
 		<div class="city_index">
@@ -39,24 +46,49 @@ export default {
 			cityList: [],
 
 			// 把热门城市放入
-			hotCity: []
+			hotCity: [],
+
+			// 判断数据是否加载完成,请求时空白控制显示的动画
+			isLoading: true,
+			// 用来控制只有选择城市才重新请求数据的
+			paerCityId: -1
 		}
 	},
 	// mounted生命周期获取数据,在渲染完之后获取
 	mounted() {
-		// 请求城市数据
-		this.axios.get("/api/cityList").then((res) => {
+		// 取出本地存储的城市列表及热门城市
+		let cityList = window.localStorage.getItem("cityList");
+		let hotCity = window.localStorage.getItem("hotList");
+
+		// 判断本地存储有没有热门城市和城市列表
+		if (cityList && hotCity) {
+			this.cityList = JSON.parse(cityList);
+			this.hotCity = JSON.parse(hotCity);
+
+			// 本地存储显示loading
+			this.isLoading = false;
+		} else {
+			// 请求城市数据
+			this.axios.get("/api/cityList").then((res) => {
 			// 先判断数据是否请求过来
-			var msg = res.data.msg;
+			let msg = res.data.msg;
 
 			// 如果msg等于ok即是请求成功
 			if (msg === "ok") {
-				var allCity = res.data.data.cities;
+				this.isLoading = false;
+				let allCity = res.data.data.cities;
 				// 如果请求的有这个数据,就调用改造城市列表数据
-				this.formatCityList(allCity);
-			}
+				let {cityList, hotCity} = this.formatCityList(allCity);
+				// 分配数据
+				this.cityList = cityList;
+				this.hotCity = hotCity;
 
+				// 本地存储城市列表及热门城市
+				window.localStorage.setItem("cityList", JSON.stringify(cityList));
+				window.localStorage.setItem("hotList", JSON.stringify(hotCity));
+			}
 		});
+		}
 	},
 	methods: {
 		// 改造城市列表数据为 {index: "A", list: [{nm: "阿拉善", id: 888}]}
@@ -91,11 +123,11 @@ export default {
 				}
 			});
 
-			// 把当前改造后的城市数据给data中的result
-			this.cityList = cityList;
-
-			// 把当前热门城市数据给data中的HotCity
-			this.hotCity = hotCity;
+			// 把热门城市数据和城市列表返回 
+			return {
+				cityList,
+				hotCity
+			}
 		},
 
 		// 设置点击A-Z跳转到对应的城市
@@ -103,8 +135,24 @@ export default {
 			// 先把城市里边A-Z的所有h2元素获取
 			let h2 = this.$refs.city_sort.getElementsByTagName("h2");
 
-			// 城市列表和右边点击跳转的A-Z的索引是一致的,点击右边的A-Z的索引对应着城市列表A-Z的索引,所以获取到城市列表的offsetTop(元素距离页面顶部)的值然后赋值给城里列表的父元素向上卷曲出去的距离
-			this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+			// // 城市列表和右边点击跳转的A-Z的索引是一致的,点击右边的A-Z的索引对应着城市列表A-Z的索引,所以获取到城市列表的offsetTop(元素距离页面顶部)的值然后赋值给城里列表的父元素向上卷曲出去的距离
+			// this.$refs.city_sort.parentNode.scrollTop = h2[index].offsetTop;
+			// 使用scroll就不能用原生的跳转了
+
+			// 用scroll跳转
+			this.$refs.city_List.toScrollTop(-h2[index].offsetTop);
+		},
+
+		handleToCity(name, id) {
+			// 点击的时候更改状态管理中的数据
+			this.$store.commit("city/CITY_INFO", {name, id});
+
+			// 设置本地存储记录城市
+			window.localStorage.setItem("nowName", name);
+			window.localStorage.setItem("nowId", id);
+
+			// 点击的时候跳转到正在热映
+			this.$router.push("/movie/nowPlaying");
 		}
 	}
 }

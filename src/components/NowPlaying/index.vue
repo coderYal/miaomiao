@@ -1,19 +1,23 @@
 <template>
-  <div class="movie_body">
-		<ul>
-			<li v-for="item in movieList" :key="item.id">
-				<div class="pic_show"><img :src=" item.img | setWidthHeight('128.180')"></div>
-				<div class="info_list">
-					<h2>{{item.nm}}</h2><img v-if="item.version" src="@/assets/maxs.png" alt="">
-					<p>观众评 <span class="grade">{{item.sc}}</span></p>
-					<p>主演: {{item.star}}</p>
-					<p>今天55家影院放映607场</p>
-				</div>
-				<div class="btn_mall">
-					购票
-				</div>
-			</li>                                      
-		</ul>
+  <div class="movie_body" ref="movie_body">
+		<Loading v-if="isLoading" />
+		<Scroller v-else :handleToScroll="handleToScroll" :handleToTouchEnd="handleToTouchEnd">
+			<ul>
+				<li class="pullDownMsg">{{ pullDownMsg }}</li>
+				<li v-for="item in movieList" :key="item.id">
+					<div @tap="handleToDateil" class="pic_show"><img :src=" item.img | setWidthHeight('128.180')"></div>
+					<div class="info_list">
+						<h2>{{item.nm}}</h2><img v-if="item.version" src="@/assets/maxs.png" alt="">
+						<p>观众评 <span class="grade">{{item.sc}}</span></p>
+						<p>主演: {{item.star}}</p>
+						<p>今天55家影院放映607场</p>
+					</div>
+					<div class="btn_mall">
+						购票
+					</div>
+				</li>                                      
+			</ul>
+		</Scroller>	
   </div>  
 </template>
 
@@ -24,20 +28,67 @@ export default {
 	data() {
 		return {
 			// 正在热映列表
-			movieList: []
+			movieList: [],
+			// 定义加载显示的数据
+			pullDownMsg: "",
+			// 判断数据是否加载完成,请求时空白控制显示的动画
+			isLoading: true,
+			// 用来控制只有选择城市才重新请求数据的
+			paerCityId: -1
 		}
 	},
-	// mounted生命周期获取数据,在渲染完之后获取
-	mounted() {
-		this.axios.get("/api/movieOnInfoList?cityId=10").then((res) => {
+
+	// activated生命周期是keep-alive缓存组件才调用的
+	activated() {
+		// 把状态管理中城市的id取出
+		let cityId = this.$store.state.city.id;
+
+		// 判断当前城市的id等不等于设置的paerCityId,如果等于,就不执行下面的请求
+		if (this.paerCityId === cityId) { return; }
+		this.isLoading = true;
+
+		// 请求数据动态的请求
+		this.axios.get("/api/movieOnInfoList?cityId=" + cityId).then((res) => {
 			// 判断有无拿到数据
 			let msg = res.data.msg;
 			// 如果msg等于ok就把数据赋值给data中的movieList
 			if (msg === "ok") {
+				// 赋值数据
 				let movieList = res.data.data.movieList;
 				this.movieList = movieList;
+				// 数据加载完成设置为false
+				this.isLoading = false;
+				// 把当前状态管理的id赋值给data中的paerCityId
+				this.paerCityId = cityId;
 			}
 		})
+	},
+	methods: {
+		// handleToDateil点击跳转详情页
+		handleToDateil() {
+			console.log(1);
+		},
+
+		handleToScroll(pos) {
+			if (pos.y > 30) {
+				this.pullDownMsg = "正在更新中";
+			}
+		},
+
+		handleToTouchEnd(pos) {
+			if (pos.y > 30) {
+				this.axios.get("/api/movieOnInfoList?cityId=18").then((res) => {
+					let msg = res.data.msg;
+					if (msg === "ok") {
+						this.pullDownMsg = "更新成功";
+						setTimeout(() => {
+							this.movieList = res.data.data.movieList;
+							this.pullDownMsg = "";
+						}, 500)
+					}
+				});
+			}
+		}
 	}
 
 }
@@ -57,4 +108,5 @@ export default {
 .movie_body .info_list img{ width:50px; position: absolute; right:10px; top: 5px;}
 .movie_body .btn_mall , .movie_body .btn_pre{ width:47px; height:27px; line-height: 28px; text-align: center; background-color: #f03d37; color: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;}
 .movie_body .btn_pre{ background-color: #3c9fe6;}
+.movie_body .pullDownMsg {padding: 0; margin: 0;}
 </style>

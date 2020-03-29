@@ -14,6 +14,16 @@ Vue.filter("setWidthHeight", (url, wh) => {
   return url.replace(/w\.h/, wh);
 });
 
+// 把scroll加入全局组件中
+import Scroller from "@/components/Scroller";
+// 注册全局组件
+Vue.component("Scroller", Scroller);
+
+// 把loading加入全局组件中
+import Loading from "@/components/Loading";
+// 注册全局组件
+Vue.component("Loading", Loading);
+
 Vue.config.productionTip = false
 
 new Vue({

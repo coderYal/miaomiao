@@ -57,8 +57,11 @@ export default {
 			// 请求之前先取消请求
 			this.cancelRequest();
 
-			// 发送请求
-			this.axios.get("/api/searchList?cityId=10&kw=" + newValue, {
+			// 把状态管理中城市的id取出
+			let cityId = this.$store.state.city.id;			
+
+			// 发送请求,动态的从状态管理中获取到id
+			this.axios.get("/api/searchList?cityId="+ cityId +"&kw=" + newValue, {
 				// 设置防抖节流
 				cancelToken: new this.axios.CancelToken(function(c) {
 					that.source = c;

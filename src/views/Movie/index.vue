@@ -7,7 +7,8 @@
         <div class="movie_menu">
           <!-- <router-link>点击跳转二级路由对应的页面 -->
           <router-link tag="div" to="/movie/city" class="city_name">
-            <span>大连</span><i class="iconfont icon-lower-triangle"></i>
+          <!-- 状态管理 -->
+            <span>{{$store.state.city.name}}</span><i class="iconfont icon-lower-triangle"></i>
           </router-link>
           <div class="hot_swtich">
             <router-link tag="div" to="/movie/nowPlaying" class="hot_item">正在热映</router-link>
@@ -31,6 +32,9 @@
 import Header from '@/components/Header';
 import TabBar from '@/components/TabBar';
 
+// 引入弹窗
+import { messageBox } from "@/components/JS";
+
 export default {
   // 给组件添加name方便调试
   name: "Movie",
@@ -38,7 +42,39 @@ export default {
   components: {
     Header,
     TabBar
+  },
+
+  mounted() {
+    setTimeout(() => {
+      // 获取定位的请求
+      this.axios.get("/api/getLocation").then((res) => {
+        var msg = res.data.msg;
+        if (msg === "ok") {
+          let name = res.data.data.nm;
+          let id = res.data.data.id;
+
+          // 当城市的id等于状态管理的id 就不弹框
+          if (this.$store.state.city.id == id) { return; }
+          // console.log(this.$store.state.city.id);
+          // console.log(id);
+          messageBox({
+            title: "定位",
+            content: name,
+            cancel: "取消",
+            ok: "切换定位",
+
+            // 配置切换定位
+            handleOk() {
+              window.localStorage.setItem("nowName", name);
+              window.localStorage.setItem("nowId", id);
+              window.location.reload();
+            }
+          })
+        }
+      })
+    }, 1000)
   }
+
 }
 </script>
 

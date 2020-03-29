@@ -1,23 +1,26 @@
 <template>
   <div class="cinema_body">
-    <ul>
-      <li v-for="item in cinemasList" :key="item.id">
-        <div>
-          <span>{{item.nm}}</span>
-        </div>
-        <div class="address">
-          <span>{{item.addr}}</span>
-          <span>{{item.distance}}</span>
-        </div>
-        <div class="card">
-          <div v-for="(num, key) in item.tag" v-if="num === 1 " :key="key" :class=" key | classCard ">{{ key | formatCard }}</div>
-        </div>
-        <div class="discount-label-text">
-          <img class="discount-label-card" src="@/assets/card.png" alt="">
-          {{item.promotion.cardPromotionTag}}
-        </div>
-      </li>
-    </ul>
+    <Loading v-if="isLoading" />
+    <Scroller v-else>
+      <ul>
+        <li v-for="item in cinemasList" :key="item.id">
+          <div>
+            <span>{{item.nm}}</span>
+          </div>
+          <div class="address">
+            <span>{{item.addr}}</span>
+            <span>{{item.distance}}</span>
+          </div>
+          <div class="card">
+            <div v-for="(num, key) in item.tag" v-if="num === 1 " :key="key" :class=" key | classCard ">{{ key | formatCard }}</div>
+          </div>
+          <div class="discount-label-text">
+            <img class="discount-label-card" src="@/assets/card.png" alt="">
+            {{item.promotion.cardPromotionTag}}
+          </div>
+        </li>
+      </ul>
+    </Scroller>  
   </div>
 </template>
 
@@ -28,20 +31,33 @@ export default {
   data() {
     return {
       // 影院列表数据
-      cinemasList: []
+      cinemasList: [],
+			// 判断数据是否加载完成,请求时空白控制显示的动画
+			isLoading: true,
+			// 用来控制只有选择城市才重新请求数据的
+			paerCityId: -1
     }
   },
 
-  // mounted生命周期获取数据,在渲染完之后获取
-  mounted() {
-    this.axios.get("/api/cinemaList?cityId=10").then((res) => {
+	// activated生命周期是keep-alive缓存组件才调用的
+	activated() {
+		// 把状态管理中城市的id取出
+		let cityId = this.$store.state.city.id;
+
+		// 判断当前城市的id等不等于设置的paerCityId,如果等于,就不执行下面的请求
+		if (this.paerCityId === cityId) { return; }
+    this.isLoading = true;
+    
+    this.axios.get("/api/cinemaList?cityId=" + cityId).then((res) => {
       // 把请求的结果信息msg存储到变量中
       let msg = res.data.msg;
       
       // 判断这个请求是否成功
       if (msg === "ok") {
         // 请求成功则赋值给data中的影院列表数据
-      this.cinemasList = res.data.data.cinemas;
+        this.cinemasList = res.data.data.cinemas;
+        this.isLoading = false;
+        this.paerCityId =cityId;
       }
     })
   },
