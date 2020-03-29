@@ -1,102 +1,18 @@
 <template>
   <div class="movie_body">
 		<ul>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
+			<li v-for="item in comingList" :key="item.id">
+				<div class="pic_show"><img :src=" item.img | setWidthHeight('128.180')"></div>
 				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
+					<h2>{{ item.nm }}</h2>
+					<p><span class="person">{{ item.wish }}</span> 人想看</p>
+					<p>主演: {{ item.star }}</p>
+					<p>{{ item.rt }}上映</p>
 				</div>
 				<div class="btn_pre">
 					预售
 				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>
-			<li>
-				<div class="pic_show"><img src="/images/movie_1.jpg"></div>
-				<div class="info_list">
-					<h2>无名之辈</h2>
-					<p><span class="person">17746</span> 人想看</p>
-					<p>主演: 陈建斌,任素汐,潘斌龙</p>
-					<p>2018-11-30上映</p>
-				</div>
-				<div class="btn_pre">
-					预售
-				</div>
-      </li>                                          
+      </li>                                         
 		</ul>
 	</div>
 </template>
@@ -104,7 +20,26 @@
 <script>
 export default {
   // 给组件添加name方便调试
-  name: "ComingSoon"
+	name: "ComingSoon",
+	data() {
+		return {
+			// 即将上映数据列表
+			comingList: []
+		}
+	},
+	// mounted生命周期获取数据,在渲染完之后获取
+	mounted() {
+		this.axios.get("/api/movieComingList?cityId=10").then((res) => {
+			// 判断数据是否请求过来
+			let msg = res.data.msg;
+			// 如果msg等于ok说明数据请求成功,就把数据给data中的comingList
+			if (msg === "ok") {
+				let comingList = res.data.data.comingList;
+				this.comingList = comingList;
+			}
+			
+		})
+	}	
 }
 </script>
 
@@ -122,4 +57,6 @@ export default {
 .movie_body .info_list img{ width:50px; position: absolute; right:10px; top: 5px;}
 .movie_body .btn_mall , .movie_body .btn_pre{ width:47px; height:27px; line-height: 28px; text-align: center; background-color: #f03d37; color: #fff; border-radius: 4px; font-size: 12px; cursor: pointer;}
 .movie_body .btn_pre{ background-color: #3c9fe6;}
+.person {color: #faaf00;    font-size: 15px;
+    font-weight: 600;}
 </style>
