@@ -20,11 +20,7 @@ html,body{ height:100%;}
 
 
 
-#content .detail_intro{ padding: 10px;}
-#content .detail_player{ margin:20px;}
-.detail_player .swiper-slide{ width:70px; margin-right: 20px; text-align: center; font-size: 14px;}
-.detail_player .swiper-slide img{ width:100%; margin-bottom: 5px;}
-.detail_player .swiper-slide p:nth-of-type(2){ color:#999;}
+
 
 
 

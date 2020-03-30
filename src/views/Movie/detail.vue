@@ -7,7 +7,10 @@
     <Loading v-if="isLoading" />
     <div v-else id="content" class="contentDetail">
       <div class="detail_list">
-        <div class="detail_list_bg"></div>
+        <div
+          class="detail_list_bg"
+          :style="{ 'background-image': 'url('+ detailMovie.img.replace(/w\.h/, '148.208') +')' }"
+        ></div>
         <div class="detail_list_filter"></div>
         <div class="detail_list_content">
           <div class="detail_list_img">
@@ -31,10 +34,10 @@
           <li v-for="(item, index) in detailMovie.photos" :key="index" class="swiper-slide">
             <div>
               <img :src=" item | setWidthHeight('140.127') " alt />
-            </div>  
+            </div>
           </li>
         </ul>
-      </div> 
+      </div>
     </div>
   </div>
 </template>
@@ -83,8 +86,8 @@ export default {
             slidesPerView: "auto",
             freeMode: true,
             freeModeSticky: true
-          })
-        })
+          });
+        });
       }
     });
   }
@@ -128,7 +131,7 @@ export default {
 .detail_list .detail_list_bg {
   width: 100%;
   height: 100%;
-  background: url(/images/movie_1.jpg) 0 40%;
+  background: 0 40%;
   filter: blur(20px);
   background-size: cover;
   position: absolute;
@@ -179,5 +182,24 @@ export default {
   line-height: 20px;
   font-size: 14px;
   color: #ccc;
+}
+#content .detail_intro {
+  padding: 10px;
+}
+#content .detail_player {
+  margin: 20px;
+}
+.detail_player .swiper-slide {
+  width: 70px;
+  margin-right: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+.detail_player .swiper-slide img {
+  width: 100%;
+  margin-bottom: 5px;
+}
+.detail_player .swiper-slide p:nth-of-type(2) {
+  color: #999;
 }
 </style>

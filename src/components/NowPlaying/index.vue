@@ -106,7 +106,8 @@ export default {
 <style scoped>
 #content .movie_body {
   flex: 1;
-  overflow: auto;
+	overflow: auto;
+	position: relative;
 }
 .movie_body ul {
   margin: 0 12px;

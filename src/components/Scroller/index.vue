@@ -36,14 +36,14 @@ export default {
     this.scroll = scroll;
 
     // 把方法回调出去
-    scroll.on("scroll", (pos) => {
+    scroll.on("scroll", pos => {
       this.handleToScroll(pos);
     });
 
     // 把方法回调出去
-    scroll.on("touchEnd", (pos) => {
+    scroll.on("touchEnd", pos => {
       this.handleToTouchEnd(pos);
-    })
+    });
   },
 
   methods: {
@@ -52,9 +52,16 @@ export default {
       this.scroll.scrollTo(0, y);
     }
   }
-}
+};
 </script>
 
 <style scoped>
-.wrapper {height: 100%;}
+.wrapper {
+  position: absolute;
+  /* left: auto;
+  right: auto; */
+  width: 100%;
+  overflow: hidden;
+  height: 100%;
+}
 </style>
