@@ -1,6 +1,8 @@
 <template>
   <header id="header">
-		<h1>{{title}}</h1>
+    <!-- 设置插槽用于放置详情页的图片 -->
+		<slot></slot>
+    <h1>{{title}}</h1>
 	</header>
 </template>
 

@@ -24,6 +24,8 @@
         </keep-alive>
       </div>
     <TabBar />
+    <!-- 用命名视图同级显示详情页 -->
+    <router-view name="detail" />
   </div>
 </template>
 
@@ -55,8 +57,7 @@ export default {
 
           // 当城市的id等于状态管理的id 就不弹框
           if (this.$store.state.city.id == id) { return; }
-          // console.log(this.$store.state.city.id);
-          // console.log(id);
+
           messageBox({
             title: "定位",
             content: name,
